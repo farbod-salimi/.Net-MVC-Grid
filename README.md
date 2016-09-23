@@ -98,3 +98,38 @@
         <!-- End GRID -->
     </div>
 ```
+
+# Ajax example with paging
+```cs
+        public string MyGridAjaxProvider(int page)
+        {
+            List<Object> model = DataProvider.GetAllObjects().OrderByDescending(x => x.ObjectTimestamp).ToList();
+            
+            Grid<Object> grid = new Grid<Object>();
+            grid.Model = model;
+            grid.ShowActions = true;
+            grid.ShowDefaultActions = false;
+            grid.ShortHeader = true;
+            grid.ControllerName = "ListOfObjects";
+            grid.PrimaryKey = "ObjectId";
+            grid.LimitNumberRows = 7;
+            grid.LimitNumberPages = 10;
+            grid.PagerCustomLink = "javascript:getAjaxGrid({0});";
+            grid.Fields = new string[] {
+                                "ObjectName",
+                                "ObjectType",
+                                "ObjectTimestamp"
+                            };
+
+            grid.CustomActions = new List<GridAction>
+            {
+                new GridAction
+                {
+                    Text = "Show Object",
+                    URL = "javascript:getObject({0}, '')"
+                }
+           };
+
+            return grid.Compile();
+        }
+```
