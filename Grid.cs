@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -35,12 +35,14 @@ namespace Grid.Helpers
         public string ControllerName;
         public string PrimaryKey;
         public string[] Fields;
+        public int MarginBottom = 20;
         public bool ShowActions = true;
         public bool ShortHeader = false;
         public bool ShowHeader = true;
         public bool ShowPrimaryKey = true;
         public bool ShowDefaultActions = true;
         public bool ShowPager = true;
+        public bool ShowCheckBox = false;
         public Hyperlink Hyperlinks;
         public List<ForeignKeyParameter> ForeignKeys;
         public List<GridAction> CustomActions;
@@ -51,7 +53,7 @@ namespace Grid.Helpers
         public Grid()
         {
             HTML = @"<div class=""table-responsive"">
-                <table class=""table table-striped table-hover margin-bottom-0"">
+                <table class=""table table-striped table-hover margin-bottom-{MARGINBOTTOM}"">
                 <thead>
                     <tr>{HEADER}</tr>
                 </thead>
@@ -82,6 +84,9 @@ namespace Grid.Helpers
                 else
                     RemoveHeader();
 
+                // add margin-bottom
+                HTML = HTML.Replace("{MARGINBOTTOM}", MarginBottom.ToString());
+
                 MakeBody();
                 return HTML;
             }
@@ -94,6 +99,11 @@ namespace Grid.Helpers
         private void MakeHeader()
         {
             var properties = typeof(T).GetProperties();
+
+            if (ShowCheckBox == true)
+            {
+                Header += "<th>#</th>";
+            }
 
             foreach (var property in properties)
             {
@@ -176,6 +186,10 @@ namespace Grid.Helpers
                             if (property.Name == PrimaryKey)
                             {
                                 ID = int.Parse(property.GetValue(item, null).ToString());
+                                if (ShowCheckBox == true)
+                                {
+                                    Body += "<th><input type='checkbox' name='Selected" + typeof(T).Name + "' value='" + ID + "'></th>";
+                                }
                                 if (ShowPrimaryKey == true)
                                 {
                                     // add the the primary key to the body
@@ -214,7 +228,7 @@ namespace Grid.Helpers
                          <a href=""/{0}/Delete/{1}"" class=""btn btn-sm btn-icon btn-pure btn-default"" data-toggle=""tooltip"" data-original-title=""Delete"">
                          <i class=""icon wb-close"" aria-hidden=""true""></i></a>";
             }
-            if (CustomActions != null)
+            else if (CustomActions != null)
             {
                 foreach (GridAction Action in CustomActions)
                 {
@@ -242,7 +256,7 @@ namespace Grid.Helpers
             }
         }
 
-        private string PAGER = "";
+        private string PAGER = ""; // problem with 11
         private void MakePager()
         {
             // get the page query sting
@@ -255,7 +269,7 @@ namespace Grid.Helpers
             // if show pager is true
             if (ShowPager == true)
             {
-                // find number og pages
+                // find number of pages
                 int NumberOfPage = (int)Math.Ceiling((double)Model.Count() / LimitNumberRows);
 
                 // initialize the pager
@@ -270,7 +284,7 @@ namespace Grid.Helpers
                     numPageInHTMLs[0] = 1;
                     numPageInHTMLs[1] = 2;
                     // find the first elements of the array
-                    if ((NumberOfPage / LimitNumberPages) > ActivePage)
+                    if (((double)NumberOfPage / (double)LimitNumberPages) > ActivePage)
                     {
                         for (int i = 2; i < LimitNumberPages - 2; i++)
                         {
@@ -279,7 +293,7 @@ namespace Grid.Helpers
                         numPageInHTMLs[LimitNumberPages - 2] = -1;
                     }
                     // find the last elements of the array
-                    else if (((NumberOfPage / LimitNumberPages) < ActivePage) && (NumberOfPage - ActivePage < LimitNumberPages / 2))
+                    else if ((((double)NumberOfPage / (double)LimitNumberPages) < ActivePage) && (NumberOfPage - ActivePage < LimitNumberPages / 2))
                     {
                         numPageInHTMLs[2] = -1;
                         for (int i = 3; i <= LimitNumberPages - 2; i++)
