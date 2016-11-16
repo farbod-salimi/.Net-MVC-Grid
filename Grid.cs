@@ -6,6 +6,7 @@ using System.Web;
 
 namespace Grid.Helpers
 {
+    
     public struct ForeignKeyParameter
     {
         public string TableName;
@@ -283,8 +284,12 @@ namespace Grid.Helpers
                     // show the first two pages
                     numPageInHTMLs[0] = 1;
                     numPageInHTMLs[1] = 2;
+
                     // find the first elements of the array
-                    if (((double)NumberOfPage / (double)LimitNumberPages) > ActivePage)
+                    // reduced 3 because of [...] button and two last buttons
+                    // for example : [1] [2] [3] [4] [...] [10] [15]
+                    // we should not consider [...], [10] and [15]
+                    if ((LimitNumberPages - 3) > ActivePage)
                     {
                         for (int i = 2; i < LimitNumberPages - 2; i++)
                         {
