@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -6,7 +6,6 @@ using System.Web;
 
 namespace Grid.Helpers
 {
-    
     public struct ForeignKeyParameter
     {
         public string TableName;
@@ -22,8 +21,10 @@ namespace Grid.Helpers
 
     public struct GridAction
     {
+        public bool OnClick;
         public string Text;
         public string URL;
+        public string CssClass;
     }
 
     public class Grid<T>
@@ -211,7 +212,7 @@ namespace Grid.Helpers
                 // check if there is any actions
                 if (ShowActions == true && ID != 0)
                 {
-                    MakeActionsBody(ID);
+                    MakeActions(ID);
                 }
 
             }
@@ -219,7 +220,7 @@ namespace Grid.Helpers
             HTML = HTML.Replace("{BODY}", Body);
         }
 
-        private void MakeActionsBody(int ID)
+        private void MakeActions(int ID)
         {
             string act = "<td>";
             if (ShowDefaultActions == true)
@@ -234,8 +235,17 @@ namespace Grid.Helpers
                 foreach (GridAction Action in CustomActions)
                 {
                     string URL = string.Format(Action.URL, ID);
-                    string customAct = @"<a href=""{0}"" class=""btn btn-sm btn-icon btn-pure btn-default"" data-original-title=""{1}"">{1}</a>";
-                    act += string.Format(customAct, URL, Action.Text);
+                    string CSS = string.Format(Action.CssClass, ID);
+                    string customAct = "";
+                    if (Action.OnClick == true)
+                    {
+                        customAct = @"<div onclick=""{0}"" class=""btn btn-xs btn-icon btn-pure btn-default {2}"" data-original-title=""{1}"">{1}</div>";
+                    }
+                    else
+                    {
+                        customAct = @"<a href=""{0}"" class=""btn btn-sm btn-icon btn-pure btn-default {2}"" data-original-title=""{1}"">{1}</a>";
+                    }
+                    act += string.Format(customAct, URL, Action.Text, CSS);
                 }
             }
 
@@ -249,7 +259,7 @@ namespace Grid.Helpers
             if (PropertyName == Hyperlinks.FieldName && ID != 0)
             {
                 string url = string.Format(Hyperlinks.URL, ID);
-                Body += string.Format("<td><a href='{1}'>{0}</></td>", Value, url);
+                Body += string.Format("<td><a href='{1}'>{0}</a></td>", Value, url);
             }
             else
             {
@@ -257,7 +267,7 @@ namespace Grid.Helpers
             }
         }
 
-        private string PAGER = ""; // problem with 11
+        private string PAGER = "";
         private void MakePager()
         {
             // get the page query sting
@@ -284,7 +294,6 @@ namespace Grid.Helpers
                     // show the first two pages
                     numPageInHTMLs[0] = 1;
                     numPageInHTMLs[1] = 2;
-
                     // find the first elements of the array
                     // reduced 3 because of [...] button and two last buttons
                     // for example : [1] [2] [3] [4] [...] [10] [15]
