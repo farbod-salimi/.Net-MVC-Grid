@@ -25,6 +25,7 @@ namespace Grid.Helpers
         public string Text;
         public string URL;
         public string CssClass;
+        public string Attribute;
     }
 
     public class Grid<T>
@@ -34,10 +35,9 @@ namespace Grid.Helpers
         private string Body;
 
         public List<T> Model;
-        public string ControllerName;
-        public string PrimaryKey;
-        public string[] Fields;
         public int MarginBottom = 20;
+        public int LimitNumberRows = 0;
+        public int LimitNumberPages = 0;
         public bool ShowActions = true;
         public bool ShortHeader = false;
         public bool ShowHeader = true;
@@ -45,22 +45,24 @@ namespace Grid.Helpers
         public bool ShowDefaultActions = true;
         public bool ShowPager = true;
         public bool ShowCheckBox = false;
+        public string ControllerName;
+        public string PrimaryKey;
+        public string[] Fields;
+        public string CssClass = "table table-striped table-hover";
+        public string PagerCustomLink = null;
         public Hyperlink Hyperlinks;
         public List<ForeignKeyParameter> ForeignKeys;
         public List<GridAction> CustomActions;
-        public int LimitNumberRows = 0;
-        public int LimitNumberPages = 0;
-        public string PagerCustomLink = null;
 
         public Grid()
         {
             HTML = @"<div class=""table-responsive"">
-                <table class=""table table-striped table-hover margin-bottom-{MARGINBOTTOM}"">
+                <table class=""{CSSCLASS} margin-bottom-{MARGINBOTTOM}"">
                 <thead>
                     <tr>{HEADER}</tr>
                 </thead>
                 <tbody>
-                    <tr>{BODY}</tr>
+                    {BODY}
                 </tbody>
                 </table>
                 {PAGER}
@@ -86,7 +88,8 @@ namespace Grid.Helpers
                 else
                     RemoveHeader();
 
-                // add margin-bottom
+                // add css-class and margin-bottom
+                HTML = HTML.Replace("{CSSCLASS}", CssClass);
                 HTML = HTML.Replace("{MARGINBOTTOM}", MarginBottom.ToString());
 
                 MakeBody();
@@ -234,18 +237,16 @@ namespace Grid.Helpers
             {
                 foreach (GridAction Action in CustomActions)
                 {
-                    string URL = string.Format(Action.URL, ID);
-                    string CSS = string.Format(Action.CssClass, ID);
                     string customAct = "";
-                    if (Action.OnClick == true)
-                    {
-                        customAct = @"<div onclick=""{0}"" class=""btn btn-xs btn-icon btn-pure btn-default {2}"" data-original-title=""{1}"">{1}</div>";
-                    }
-                    else
-                    {
-                        customAct = @"<a href=""{0}"" class=""btn btn-sm btn-icon btn-pure btn-default {2}"" data-original-title=""{1}"">{1}</a>";
-                    }
-                    act += string.Format(customAct, URL, Action.Text, CSS);
+                    string URL = "#";
+                    string CSS = "";
+                    if (Action.URL != null) URL = string.Format(Action.URL, ID);
+                    if (Action.CssClass != null) CSS = string.Format(Action.CssClass, ID);
+
+                    if (Action.OnClick == true) customAct = @"<div onclick=""{0}"" class=""{2}"" {3}>{1}</div> ";
+                    else customAct = @"<a href=""{0}"" class=""{2}"" {3}>{1}</a> ";
+
+                    act += string.Format(customAct, URL, Action.Text, CSS, Action.Attribute);
                 }
             }
 
@@ -286,7 +287,7 @@ namespace Grid.Helpers
                 // initialize the pager
                 PAGER += "<center><div class='btn-group btn-group-sm' role='group'>";
 
-                //if there is a limitation and number of pages is greater than limit
+                // if there is a limitation and number of pages is greater than limit
                 if ((NumberOfPage > LimitNumberPages) && (LimitNumberPages > 0))
                 {
                     // initial the list of pages
