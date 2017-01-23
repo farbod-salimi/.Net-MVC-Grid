@@ -25,6 +25,7 @@ namespace Grid.Helpers
         public string Text;
         public string URL;
         public string CssClass;
+        public string Icon;
         public string Attribute;
     }
 
@@ -240,13 +241,14 @@ namespace Grid.Helpers
                     string customAct = "";
                     string URL = "#";
                     string CSS = "";
+                    string icon = "";
                     if (Action.URL != null) URL = string.Format(Action.URL, ID);
                     if (Action.CssClass != null) CSS = string.Format(Action.CssClass, ID);
-
-                    if (Action.OnClick == true) customAct = @"<div onclick=""{0}"" class=""{2}"" {3}>{1}</div> ";
+                    if (Action.Icon != null) icon = string.Format("<i class=\"{0}\" aria-hidden=\"true\"></i> ", Action.Icon);
+                    if (Action.OnClick == true) customAct = @"<div onclick=""{0}"" class=""{2}"" {3}>{4}{1}</div> ";
                     else customAct = @"<a href=""{0}"" class=""{2}"" {3}>{1}</a> ";
 
-                    act += string.Format(customAct, URL, Action.Text, CSS, Action.Attribute);
+                    act += string.Format(customAct, URL, Action.Text, CSS, Action.Attribute, icon);
                 }
             }
 
