@@ -234,7 +234,8 @@ namespace Grid.Helpers
                          <a href=""/{0}/Delete/{1}"" class=""btn btn-sm btn-icon btn-pure btn-default"" data-toggle=""tooltip"" data-original-title=""Delete"">
                          <i class=""icon wb-close"" aria-hidden=""true""></i></a>";
             }
-            else if (CustomActions != null)
+
+            if (CustomActions != null)
             {
                 foreach (GridAction Action in CustomActions)
                 {
@@ -246,7 +247,7 @@ namespace Grid.Helpers
                     if (Action.CssClass != null) CSS = string.Format(Action.CssClass, ID);
                     if (Action.Icon != null) icon = string.Format("<i class=\"{0}\" aria-hidden=\"true\"></i> ", Action.Icon);
                     if (Action.OnClick == true) customAct = @"<div onclick=""{0}"" class=""{2}"" {3}>{4}{1}</div> ";
-                    else customAct = @"<a href=""{0}"" class=""{2}"" {3}>{1}</a> ";
+                    else customAct = "<a style=\"text-decoration: none\" href=\"{0}\" class=\"{2}\" {3}>{4}{1}</a> ";
 
                     act += string.Format(customAct, URL, Action.Text, CSS, Action.Attribute, icon);
                 }
